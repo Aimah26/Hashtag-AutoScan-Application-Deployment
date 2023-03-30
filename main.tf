@@ -27,3 +27,36 @@ module "key_pair" {
   public_key = file("~/keypairs/Hashkey.pub")
 }
 
+module "Sonarqube" {
+  source                 = "terraform-aws-modules/ec2-instance/aws"
+  name                   = var.sonar-name
+  ami                    = var.ec2_ami
+  instance_type          = var.instancetype
+  key_name               = module.key_pair.key_pair_name
+  vpc_security_group_ids = [module.sg.sonarqube-sg-id]
+  subnet_id              = module.vpc.public_subnets[0]
+  user_data              = file("./User_Data/sonar.sh")
+  tags = {
+    Terraform = "true"
+    Name      = "${var.name}-sonar-server"
+  }
+}
+
+module "Bastion" {
+  source                 = "terraform-aws-modules/ec2-instance/aws"
+  name                   = var.ec2_name
+  ami                    = var.ec2_ami
+  instance_type          = var.instancetype
+  key_name               = module.key_pair.key_pair_name
+  vpc_security_group_ids = [module.sg.bastion-sg-id]
+  subnet_id              = module.vpc.public_subnets[0]
+  user_data = templatefile("./User_Data/bastion_userdata.sh",
+    {
+      keypair = "~/keypairs/Hashkey"
+    }
+  )
+  tags = {
+    Terraform = "true"
+    Name      = "${var.name}-Bastion"
+  }
+}
