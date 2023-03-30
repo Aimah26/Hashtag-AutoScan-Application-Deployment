@@ -75,3 +75,19 @@ variable "prot" {
 variable "all_access" {
   default = "0.0.0.0/0"
 }
+
+variable "ec2_name" {
+  default = "Hash-ec2"
+}
+
+variable "sonar-name" {
+  default = "sonar-sever"
+}
+
+variable "ec2_ami" {
+  default = "ami-05c96317a6278cfaa"
+}
+
+variable "instancetype" {
+  default = "t3.medium"
+}
