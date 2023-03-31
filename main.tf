@@ -17,7 +17,7 @@ module "vpc" {
 
 # security Group
 module "sg" {
-  source  = "./local_module/sg"
+  source  = "./module/sg"
   Hash-vpc = module.vpc.vpc_id
 }
 
@@ -35,7 +35,7 @@ module "Sonarqube" {
   key_name               = module.key_pair.key_pair_name
   vpc_security_group_ids = [module.sg.sonarqube-sg-id]
   subnet_id              = module.vpc.public_subnets[0]
-  user_data              = file("./User_Data/sonar.sh")
+  user_data              = file("module/User_Data/sonar.sh")
   tags = {
     Terraform = "true"
     Name      = "${var.name}-sonar-server"
@@ -50,7 +50,7 @@ module "Bastion" {
   key_name               = module.key_pair.key_pair_name
   vpc_security_group_ids = [module.sg.bastion-sg-id]
   subnet_id              = module.vpc.public_subnets[0]
-  user_data = templatefile("./User_Data/bastion_userdata.sh",
+  user_data = templatefile("module/User_Data/bastion-userdata.sh",
     {
       keypair = "~/keypairs/Hashkey"
     }
@@ -59,4 +59,40 @@ module "Bastion" {
     Terraform = "true"
     Name      = "${var.name}-Bastion"
   }
+}
+
+module "jenkins" {
+  source = "./module/jenkins"
+  instance_type = var.instancetype
+  ami = var.ec2_ami
+  azs = var.az1
+  subnet_id = module.vpc.private_subnets[0]
+  key_name = module.key_pair.key_pair_name
+  vpc_security_group_ids = [module.sg.jenkins-sg-id]
+}
+
+module "jenkins_lb" {
+  source = "./module/jenkins-lb"
+  lb_security = module.sg.alb-sg-id
+  lb_subnet1 = module.vpc.public_subnets[0]
+  lb_subnet2 = module.vpc.public_subnets[1]
+  target_instance = module.jenkins.jenkins_ID
+}
+
+module "docker" {
+  source = "./module/docker"
+  instance_type = var.instancetype
+  ami = var.ec2_ami
+  azs = var.az2
+  subnet_id = module.vpc.private_subnets[1]
+  key_name = module.key_pair.key_pair_name
+  vpc_security_group_ids = [module.sg.docker-sg-id]
+}
+
+module "docker_lb" {
+  source = "./module/docker-lb"
+  lb_security = module.sg.alb-sg-id
+  lb_subnet1 = module.vpc.public_subnets[0]
+  lb_subnet2 = module.vpc.public_subnets[1]
+  target_instance = module.docker.docker_id
 }
