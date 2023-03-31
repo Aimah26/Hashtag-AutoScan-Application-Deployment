@@ -38,6 +38,9 @@ variable "http_port" {
   default = 80
 }
 
+variable "keyname" {
+  default = "Hashkey"
+}
 
 variable "ssh_port" {
   default = 22
