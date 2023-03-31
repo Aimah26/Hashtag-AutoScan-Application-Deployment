@@ -96,3 +96,22 @@ module "docker_lb" {
   lb_subnet2 = module.vpc.public_subnets[1]
   target_instance = module.docker.docker_id
 }
+
+module "nexus" {
+  source = "./module/nexus"
+  instance_type = var.instancetype
+  ami = var.ec2_ami
+  key_name = module.key_pair.key_pair_name
+  subnet_id = module.vpc.public_subnets[0]
+  nexus_SG = [module.sg.nexus-sg-id]
+}
+
+module "ansible" {
+  source = "./module/ansible"
+  instance_type = var.instancetype
+  ami = var.ec2_ami
+  azs = var.az1
+  key_name = module.key_pair.key_pair_name
+  subnet_id = module.vpc.public_subnets[1]
+  vpc_security_group_ids = [module.sg.ansible-sg-id]
+}

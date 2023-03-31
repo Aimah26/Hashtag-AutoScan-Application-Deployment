@@ -25,3 +25,7 @@ output "alb-sg-id" {
 output "bastion-sg-id" {
   value = aws_security_group.Hash_bastion_SG.id
 }
+
+output "nexus-sg-id" {
+  value = aws_security_group.Hash_nexus_SG.id
+}

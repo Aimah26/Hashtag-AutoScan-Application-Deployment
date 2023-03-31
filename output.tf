@@ -23,5 +23,12 @@ output "Docker_IP" {
 
 output "docker_lb" {
   value = module.docker_lb.lb_DNS
-  
+}
+
+output "nexus-ip" {
+  value = module.nexus.nexus-ip
+}
+
+output "ansible_IP" {
+  value = module.ansible.ansible_id
 }
