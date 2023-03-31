@@ -269,4 +269,37 @@ resource "aws_security_group" "Hash_DB_Backend_SG" {
   }
 }
 
+#Security group for Nexus
+resource "aws_security_group" "Hash_nexus_SG" {
+  name = "${var.name}-nexus_SG"
+  description = "Allow inbound Traffic"
+  vpc_id      = var.Hash-vpc
 
+  ingress {
+    description = "Allow ssh access"
+    from_port   = var.ssh_port
+    to_port     = var.ssh_port
+    protocol    = "tcp"
+    cidr_blocks = [var.all_access]
+  }
+
+    ingress {
+    description = "Allow inbound traffic"
+    from_port   = var.proxy_port2
+    to_port     = var.proxy_port2
+    protocol    = "tcp"
+    cidr_blocks = [var.all_access]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.all_access]
+  }
+
+  tags = {
+    Name = "${var.name}-nexus_SG"
+  }
+  
+}
