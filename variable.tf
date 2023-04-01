@@ -94,3 +94,38 @@ variable "ec2_ami" {
 variable "instancetype" {
   default = "t3.medium"
 }
+
+#ASG Variables
+variable "ami-name" {
+  default = "host_ami"
+}
+variable "target-instance" {
+  default = "docker_server"
+}
+variable "launch-configname" {
+  default = ""
+}
+
+variable "sg_name3" {
+  default = "                                                "
+}
+
+variable "asg-group-name" {
+  default = "asg"
+}
+variable "vpc-zone-identifier" {
+  default = ""
+}
+variable "target-group-arn" {
+  default = ""
+}
+variable "asg-policy" {
+  default = ""
+}
+variable "domain_name" {
+  default = "adfimah.com"
+}
+
+variable "new_relic_key" {
+  default = "eu01xxbca018499adedd74cacda9d3d13e7dNRAL"
+}

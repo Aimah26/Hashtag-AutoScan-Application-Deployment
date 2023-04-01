@@ -32,3 +32,15 @@ output "nexus-ip" {
 output "ansible_IP" {
   value = module.ansible.ansible_id
 }
+
+# output "Continuous-ip" {
+#   value = module.Cont_Instance.private_ip
+# }
+
+output "lb_DNS" {
+  value = module.alb.lb_DNS
+}
+
+output "Stage_lb_dns" {
+  value = module.stage_lb.stage_lb_DNS
+}

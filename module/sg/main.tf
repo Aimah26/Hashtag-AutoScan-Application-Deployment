@@ -182,6 +182,14 @@ resource "aws_security_group" "Hash_ALB_SG" {
   }
 
   ingress {
+    description = "Allow ssh access"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.all_access]
+  }
+
+  ingress {
     description = "Allow proxy access"
     from_port   = var.proxy_port1
     to_port     = var.proxy_port1

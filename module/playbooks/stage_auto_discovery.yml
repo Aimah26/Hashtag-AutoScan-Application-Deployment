@@ -1,0 +1,65 @@
+---
+ - hosts: localhost
+   connection: local
+   gather_facts: no
+   
+
+
+   tasks:
+     - name: Get STAGE_Server Inventory IP
+       set_fact: node=\"{{ groups['STAGE_Server'] | join(',')}}\"
+
+     - name: Store STAGE_Server Inventory IP in a file
+       shell: |
+         sudo echo \"STAGE_Inventory: {{(node.split(','))}}\" > ~/playbooks/STAGEInventoryIp.yml
+
+     - include_vars: ~/playbooks/STAGEInventoryIp.yml
+
+     - name: Get list of running STAGE EC2 instance IP
+       ec2_instance_info:
+         region: eu-west-2
+         filters:
+           \"tag:Name\": [\"stage_docker_asg\"]
+       register: ec2_instance_info
+     - set_fact:
+         msg: \"{{ ec2_instance_info | json_query('instances[*].private_ip_address') }}\"
+     - name : Store STAGE Console IP in a file
+       shell: |
+        sudo echo \"STAGEConsole: {{msg}}\" > ~/playbooks/STAGEConsoleIP.yml
+
+     - include_vars: ~/playbooks/STAGEConsoleIP.yml
+
+     - name: loop through inventory hostnames
+       debug:
+         msg: \"{{item}}\"
+       with_inventory_hostnames: STAGE_Server
+       register: hostip
+     
+     - name: remove host ip's
+       lineinfile:
+         path: /etc/ansible/stage_hosts
+         regexp: \"{{item}}\"
+         line: ''
+       with_inventory_hostnames: STAGE_Server
+
+     - name: remove unnecessary empty lines
+       lineinfile:
+         path: /etc/ansible/stage_hosts
+         regexp: ^\n
+         state: absent
+       with_inventory_hostnames: STAGE_Server
+
+     - name: update new inventory file
+       shell: |
+          echo -e {% for ip in STAGEConsole %}
+          \"{{ ip }} ansible_ssh_private_key_file=/home/ec2-user/Hashkey\\n\" {% endfor %} >> /etc/ansible/stage_hosts
+
+     - meta: refresh_inventory
+     
+     - name: Pause for 10 seconds to build app cache
+       wait_for:
+         timeout : 20
+ - import_playbook: /home/ec2-user/playbooks/Stagecontainer.yml
+   ignore_errors: yes
+# - import_playbook: /home/ubuntu/playbooks/deployment.yml
+#   ignore_errors: yes
