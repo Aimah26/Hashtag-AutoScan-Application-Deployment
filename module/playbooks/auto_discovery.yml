@@ -1,0 +1,64 @@
+---
+ - hosts: localhost
+   connection: local
+   gather_facts: no
+   
+
+
+   tasks:
+     - name: Get PROD_Server Inventory IP
+       set_fact: node=\"{{ groups['PROD_Server'] | join(',')}}\"
+
+     - name: Store PROD_Server Inventory IP in a file
+       shell: |
+         sudo echo \"PROD_Inventory: {{(node.split(','))}}\" > ~/playbooks/PRODInventoryIp.yml
+
+     - include_vars: ~/playbooks/PRODInventoryIp.yml
+
+     - name: Get list of running PROD EC2 instance IP
+       ec2_instance_info:
+         region: eu-west-2
+         filters:
+           \"tag:Name\": [\"docker_asg\", \"docker_server0\"]
+       register: ec2_instance_info
+     - set_fact:
+         msg: \"{{ ec2_instance_info | json_query('instances[*].private_ip_address') }}\"
+     - name : Store PROD Console IP in a file
+       shell: |
+        sudo echo \"PRODConsole: {{msg}}\" > ~/playbooks/PRODConsoleIP.yml
+
+     - include_vars: ~/playbooks/PRODConsoleIP.yml
+
+     - name: loop through inventory hostnames
+       debug:
+         msg: \"{{item}}\"
+       with_inventory_hostnames: PROD_Server
+       register: hostip
+     
+     - name: remove host ip's
+       lineinfile:
+         path: /etc/ansible/hosts
+         regexp: \"{{item}}\"
+         line: ''
+       with_inventory_hostnames: PROD_Server
+
+     - name: remove unnecessary empty lines
+       lineinfile:
+         path: /etc/ansible/hosts
+         regexp: ^\n
+         state: absent
+       with_inventory_hostnames: PROD_Server
+
+     - name: update new inventory file
+       shell: |
+          echo -e {% for ip in PRODConsole %}
+          \"{{ ip }} ansible_ssh_private_key_file=/home/ec2-user/paceud-kp2\\n\" {% endfor %} >> /etc/ansible/hosts
+
+     - meta: refresh_inventory
+     - name: Pause for 10 seconds to build app cache
+       wait_for:
+         timeout : 20
+ - import_playbook: /home/ec2-user/playbooks/PRODcontainer.yml
+   ignore_errors: yes
+# - import_playbook: /home/ubuntu/playbooks/deployment.yml
+#   ignore_errors: yes

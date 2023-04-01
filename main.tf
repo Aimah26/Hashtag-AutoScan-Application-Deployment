@@ -115,3 +115,78 @@ module "ansible" {
   subnet_id = module.vpc.public_subnets[1]
   vpc_security_group_ids = [module.sg.ansible-sg-id]
 }
+
+module "asg" {
+  source = "./module/asg"
+  vpc_subnet1 = module.vpc.public_subnets[0]
+  vpc_subnet2 = module.vpc.public_subnets[1]
+  lb_arn = module.docker_lb.lb_tg
+  asg_sg = module.sg.docker-sg-id
+  key_pair = module.key_pair.key_pair_name
+  ami_source_instance = module.docker.docker_id
+}
+
+# AWS Certificate Manager
+module "aws-acm" {
+  source        = "./module/aws-acm"
+  lb_arn        = module.alb.lb_arn
+  lb_target_arn = module.alb.lb_tg
+  lb-zone-id = module.alb.lb_zone_id
+  prod-lb-dns = module.alb.lb_DNS
+  stage-lb-dns = module.stage_lb.stage_lb_DNS
+  stage-lb-zone-id = module.stage_lb.stage_lb_zone_id
+  lb_target_arn2 = module.stage_lb.stage_lb_tg
+  lb_arn2 = module.stage_lb.stage_lb_arn
+}
+
+module "route53" {
+  source = "./module/route53"
+  lb_dns = module.alb.lb_DNS
+  lb-zone-id = module.alb.lb_zone_id
+}
+
+module "alb" {
+  source = "./module/alb"
+  lb_security = module.sg.alb-sg-id
+  lb_subnet1 = module.vpc.public_subnets[0]
+  lb_subnet2 = module.vpc.public_subnets[1]
+  vpc_name = module.vpc.vpc_id
+  target_instance = var.instancetype
+}
+
+module "stage_lb" {
+  source = "./module/stage-app-lb"
+  lb_security = module.sg.alb-sg-id
+  lb_subnet1 = module.vpc.public_subnets[0]
+  lb_subnet2 = module.vpc.public_subnets[1]
+  vpc_name = module.vpc.vpc_id
+  target_instance = var.instancetype
+}
+
+# # Database
+# module "db" {
+#   source                 = "terraform-aws-modules/rds/aws"
+#   identifier             = "pacaaddb"
+#   engine                 = "mysql"
+#   engine_version         = "5.7"
+#   instance_class         = "db.t3.medium"
+#   allocated_storage      = 5
+#   db_name                = "pacaadDB"
+#   username               = "admin"
+#   password               = "admin"
+#   port                   = "3306"
+#   vpc_security_group_ids = [module.sg.mysql-sg-id]
+#   tags = {
+#     Owner       = "user"
+#     Environment = "dev"
+#   }
+#   # DB subnet group
+#   create_db_subnet_group = true
+#   subnet_ids             = [module.vpc.private_subnets[0], module.vpc.private_subnets[1]]
+#   # DB parameter group
+#   family = "mysql5.7"
+#   # DB option group
+#   major_engine_version = "5.7"
+#   # Database Deletion Protection
+#   deletion_protection = false
+# }
