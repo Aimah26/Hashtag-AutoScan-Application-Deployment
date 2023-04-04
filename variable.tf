@@ -11,11 +11,11 @@ variable "vpc_cidr" {
 }
 
 variable "az1" {
-  default = "eu-west-2a"
+  default = "eu-west-1a"
 }
 
 variable "az2" {
-  default = "eu-west-2b"
+  default = "eu-west-1b"
 }
 
 variable "prv-sn1" {
@@ -88,7 +88,7 @@ variable "sonar-name" {
 }
 
 variable "ec2_ami" {
-  default = "ami-05c96317a6278cfaa"
+  default = "ami-0b04ce5d876a9ba29"
 }
 
 variable "instancetype" {
@@ -129,3 +129,6 @@ variable "domain_name" {
 variable "new_relic_key" {
   default = "eu01xxbca018499adedd74cacda9d3d13e7dNRAL"
 }
+
+# variable "nexus-ip" {}
+

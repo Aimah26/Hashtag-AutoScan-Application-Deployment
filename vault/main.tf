@@ -3,16 +3,33 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+# VPC
+module "vpc" {
+  source                 = "terraform-aws-modules/vpc/aws"
+  name                   = var.vpc_name
+  cidr                   = var.vpc_cidr
+  azs                    = [var.az1]
+  public_subnets         = [var.pub-sn1]
+  enable_nat_gateway     = false
+  single_nat_gateway     = false
+  one_nat_gateway_per_az = false
+  tags = {
+    Terraform = "true"
+    Name      = "${var.name}-vpc"
+  }
+}
+
 #Creating EC2 Keypair
 resource "aws_key_pair" "vault-keypair" {
   key_name   = "vault-keypair"
-  public_key = file("~/keypairs/ssh_keypair.pub")
+  public_key = file("~/keypairs/vault-keypair.pub")
 }
 
 # Security group for vault
 resource "aws_security_group" "vault-SG" {
   name        = "allow_tls"
   description = "Allow TLS inbound traffic"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     description      = "https port"
@@ -55,8 +72,9 @@ resource "aws_security_group" "vault-SG" {
 
 # Creating EC2 for Terraform Vault
 resource "aws_instance" "vault" {
-    ami = "ami-05b457b541faec0ca"
+    ami = "ami-00aa9d3df94c6c354"
     instance_type = "t2.medium"
+    subnet_id = module.vpc.public_subnets[0]
     vpc_security_group_ids = [aws_security_group.vault-SG.id]
     iam_instance_profile = aws_iam_instance_profile.vault-kms-unseal.id
     key_name = aws_key_pair.vault-keypair.key_name

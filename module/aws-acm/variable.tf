@@ -31,3 +31,5 @@ variable "domain_name1"{
 variable "domain_name2"{
     default = "stage.adfimah.com"
 }
+
+variable "lb-dns-name" {}

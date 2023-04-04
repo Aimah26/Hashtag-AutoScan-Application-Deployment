@@ -22,9 +22,8 @@ variable "lb_TG_name" {
     default = "docker-lb-TG"
 }
 
-variable "vpc_name" {
-    default = "dummy"
-}
+variable "vpc_name" {}
+
 
 variable "target_instance" {
     default = "dummy"

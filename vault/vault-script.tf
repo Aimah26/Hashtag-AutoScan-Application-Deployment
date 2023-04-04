@@ -75,7 +75,11 @@ EOT
 
 sudo systemctl daemon-reload
 export VAULT_ADDR="https://adfimah.com:443"
-echo "export VAULT_ADDR=https://adfimah.com:443" >> ~/.bashrc
+cat << EOT > /etc/profile.d/vault.sh
+export VAULT_ADDR="https://adfimah.com:443"
+export VAULT_SKIP_VERIFY=true
+EOT
+# echo "export VAULT_ADDR=https://adfimah.com:443" >> ~/.bashrc
 vault -autocomplete-install
 complete -C /usr/bin/vault vault
 sudo systemctl start vault

@@ -57,12 +57,12 @@ resource "aws_lb_listener" "Hash_lb_listener2" {
   }
 }
 
-resource "aws_route53_record" "name" {
+resource "aws_route53_record" "name1" {
   name = var.domain_name1
   type = "A"
   zone_id = data.aws_route53_zone.main-domain.id
     alias  {
-      name                   = var.lb_arn
+      name                   = var.lb-dns-name
       zone_id                = var.lb-zone-id
       evaluate_target_health = false
     }

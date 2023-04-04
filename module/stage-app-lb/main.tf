@@ -36,7 +36,7 @@ resource "aws_lb_listener" "stage_lb_listener" {
 }
 
 #creating Load balancer Target Group Attachment
-resource "aws_lb_target_group_attachment" "pacaad_lb_tg_att_QA" {
+resource "aws_lb_target_group_attachment" "lb_tg_att" {
   target_group_arn = aws_lb_target_group.stage_lb_TG.arn
   target_id        = var.target_instance
   port             = var.proxy_port1
