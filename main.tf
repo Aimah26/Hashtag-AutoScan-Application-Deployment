@@ -73,6 +73,7 @@ module "jenkins" {
 
 module "jenkins_lb" {
   source = "./module/jenkins-lb"
+  vpc_name = module.vpc.vpc_id
   lb_security = module.sg.alb-sg-id
   lb_subnet1 = module.vpc.public_subnets[0]
   lb_subnet2 = module.vpc.public_subnets[1]
@@ -91,6 +92,7 @@ module "docker" {
 
 module "docker_lb" {
   source = "./module/docker-lb"
+  vpc_name = module.vpc.vpc_id
   lb_security = module.sg.alb-sg-id
   lb_subnet1 = module.vpc.public_subnets[0]
   lb_subnet2 = module.vpc.public_subnets[1]
@@ -110,10 +112,21 @@ module "ansible" {
   source = "./module/ansible"
   instance_type = var.instancetype
   ami = var.ec2_ami
-  azs = var.az1
+  azs = var.az2
   key_name = module.key_pair.key_pair_name
   subnet_id = module.vpc.public_subnets[1]
   vpc_security_group_ids = [module.sg.ansible-sg-id]
+  user_data = templatefile("./module/User_Data/ansible.sh",
+  {
+    PRODcontainer = "./module/playbooks/PRODcontainer.yml",
+    Stagecontainer = "./module/playbooks/Stagecontainer.yml",
+    auto_discovery = "./module/playbooks/auto_discovery.yml",
+    stage_auto_discovery = "./module/playbooks/Stagecontainer.yml",
+    keypair = "~/keypairs/Hashkey",
+    nexus-ip = module.nexus.nexus-ip,
+    new_relic_key = var.new_relic_key
+  }
+  )
 }
 
 module "asg" {
@@ -129,10 +142,11 @@ module "asg" {
 # AWS Certificate Manager
 module "aws-acm" {
   source        = "./module/aws-acm"
-  lb_arn        = module.alb.lb_arn
-  lb_target_arn = module.alb.lb_tg
-  lb-zone-id = module.alb.lb_zone_id
-  prod-lb-dns = module.alb.lb_DNS
+  lb-dns-name       = module.docker_lb.lb_DNS
+  lb_arn = module.docker_lb.lb_arn
+  lb_target_arn = module.docker_lb.lb_tg
+  lb-zone-id = module.docker_lb.lb_zone_id
+  prod-lb-dns = module.docker_lb.lb_DNS
   stage-lb-dns = module.stage_lb.stage_lb_DNS
   stage-lb-zone-id = module.stage_lb.stage_lb_zone_id
   lb_target_arn2 = module.stage_lb.stage_lb_tg
@@ -141,18 +155,18 @@ module "aws-acm" {
 
 module "route53" {
   source = "./module/route53"
-  lb_dns = module.alb.lb_DNS
-  lb-zone-id = module.alb.lb_zone_id
+  lb_dns = module.docker_lb.lb_DNS
+  lb-zone-id = module.docker_lb.lb_zone_id
 }
 
-module "alb" {
-  source = "./module/alb"
-  lb_security = module.sg.alb-sg-id
-  lb_subnet1 = module.vpc.public_subnets[0]
-  lb_subnet2 = module.vpc.public_subnets[1]
-  vpc_name = module.vpc.vpc_id
-  target_instance = var.instancetype
-}
+# module "alb" {
+#   source = "./module/alb"
+#   lb_security = module.sg.alb-sg-id
+#   lb_subnet1 = module.vpc.public_subnets[0]
+#   lb_subnet2 = module.vpc.public_subnets[1]
+#   vpc_name = module.vpc.vpc_id
+#   target_instance = module.docker.docker_id
+# }
 
 module "stage_lb" {
   source = "./module/stage-app-lb"
@@ -160,7 +174,7 @@ module "stage_lb" {
   lb_subnet1 = module.vpc.public_subnets[0]
   lb_subnet2 = module.vpc.public_subnets[1]
   vpc_name = module.vpc.vpc_id
-  target_instance = var.instancetype
+  target_instance = module.docker.docker_id
 }
 
 # # Database

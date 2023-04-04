@@ -1,32 +1,32 @@
 data "aws_iam_policy_document" "assume_role" {
-    statement {
-      effect = "Allow"
-      actions = ["sts:AssumeRole"]
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
 
-      principals {
-        type = "service"
-        identifiers = ["ec2.amazonaws.com"]
-      }
+    principals {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"]
     }
+  }
 }
 
 data "aws_iam_policy_document" "vault-kms-unseal" {
-    statement {
-        sid = "VaultKMSUnseal"
-      effect = "Allow"
-      resources = [aws_kms_key.vault.arn]
+  statement {
+    sid       = "VaultKMSUnseal"
+    effect    = "Allow"
+    resources = [aws_kms_key.vault.arn]
 
-      actions = [ 
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:DescribeKey"
-        ]
-    }
+    actions = [ 
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:DescribeKey",
+    ]
+  }
 }
 
 resource "aws_iam_role" "vault-kms-unseal" {
   name = "vault-kms-role"
-  assume_role_policy = data.aws_iam_policy_document.vault-kms-unseal.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_role_policy" "vault-kms-unseal" {

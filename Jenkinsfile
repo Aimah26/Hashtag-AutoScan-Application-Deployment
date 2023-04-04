@@ -3,21 +3,17 @@ pipeline{
     tools{
         maven 'maven'
     }
-    environment {
-        dockerusername = credentials('dockerhub-username')
-        dockerpassword = credentials('dockerhub-password')
-    }
     stages{
-        stage('Git pull'){
+        stage('GIt Pull'){
             steps{
-                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/Daicon001/Application.git'
+                git branch: 'main', credentialsId: 'git', url: 'https://github.com/CloudHight/Pet-Adoption-Containerisation-Project-Application-Day-Team--06-Feb.git'
             }
         }
         stage('code analysis'){
             steps{
-                withSonarQubeEnv('sonar') {
-                    sh 'mvn sonar:sonar'  
-               }
+                withSonarQubeEnv('sonar'){
+                    sh 'mvn sonar:sonar'
+                }
             }
         }
         stage('build code'){
@@ -27,53 +23,53 @@ pipeline{
         }
         stage('build image'){
             steps{
-                sh 'docker build -t $dockerusername/pipeline:1.0.11 .'
+                sh 'docker build -t daicon001/pipeline:1.0.11 .'
             }
         }
-        stage('login to dockerhub'){
+        stage('login to docker'){
             steps{
-                sh 'docker login -u $dockerusername -p $dockerpassword'
+                sh 'docker login -u daicon001 -p Ibrahim24.'
             }
         }
         stage('push image'){
             steps{
-                sh 'docker push $dockerusername/pipeline:1.0.11'
+                sh 'docker push daicon001/pipeline:1.0.11'
             }
         }
-        stage('deploy to QA'){
+        stage('deloy to stage'){
             steps{
-                sshagent(['jenkins-key']) {
-                    sh 'ssh -t -t ec2-user@10.0.1.82 -o StrictHostKeyChecking=no "ansible-playbook /home/ec2-user/playbooks/QAcontainer.yml"'
-               }
+                sshagent(['Jenkins-key']){
+                    sh 'ssh -t -t ec2-user@52.215.4.10 -o StrictHostKeyChecking=no "ansible-playbook /home/ec2-user/playbooks/Stagecontainer.yml"'
+                }
             }
+          
         }
         stage('slack notification'){
             steps{
-                slackSend channel: 'jenkinsbuild', message: 'successfully deployed to QA sever need approval to deploy PROD Env', teamDomain: 'Codeman-devops', tokenCredentialId: 'slack-cred'
+                slackSend channel: 'jenkins-pipeline', message: 'successfully deployed to stage sever need approval to deploy PROD', teamDomain: 'Fidelaimah', tokenCredentialId: 'slack-cred'
             }
         }
-        stage('Approval'){
+        stage('approval'){
             steps{
                 timeout(activity: true, time: 5) {
                   input message: 'need approval to deploy to production ', submitter: 'admin'
-               }
+                }
             }
         }
         stage('deploy to PROD'){
             steps{
-               sshagent(['jenkins-key']) {
-                    sh 'ssh -t -t ec2-user@10.0.1.82 -o StrictHostKeyChecking=no "ansible-playbook /home/ec2-user/playbooks/auto_discovery.yml"'
-               }  
+                sshagent(['Jenkins-key']){
+                    sh 'ssh -t -t ec2-user@52.215.4.10 -o StrictHostKeyChecking=no "ansible-playbook /home/ec2-user/playbooks/PRODcontainer.yml"'
+                }
             }
         }
     }
-    post {
-     success {
-       slackSend channel: 'jenkinsbuild', message: 'successfully deployed to PROD Env ', teamDomain: 'Codeman-devops', tokenCredentialId: 'slack-cred'
-     }
-     failure {
-       slackSend channel: 'jenkinsbuild', message: 'failed to deploy to PROD Env', teamDomain: 'Codeman-devops', tokenCredentialId: 'slack-cred'
-     }
-  }
-
+    post{
+        success{
+            slackSend channel: 'jenkins-pipeline', message: 'successfully deployed to deploy PROD', teamDomain: 'Fidelaimah', tokenCredentialId: 'slack-cred'
+        }
+        failure{
+            slackSend channel: 'jenkins-pipeline', message: 'failed to deploy PROD', teamDomain: 'Fidelaimah', tokenCredentialId: 'slack-cred'
+        }
+    }
 }

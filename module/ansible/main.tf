@@ -6,7 +6,10 @@ resource "aws_instance" "ansible" {
   availability_zone           = var.azs
   key_name                    = var.key_name
   associate_public_ip_address = true
-  user_data = file("module/User_Data/ansible.sh")
+  user_data = var.user_data
+  
+  # user_data = file("module/User_Data/ansible.sh")
+
 
   tags = {
     Name = "ansible"
