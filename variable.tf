@@ -95,6 +95,10 @@ variable "instancetype" {
   default = "t3.medium"
 }
 
+variable "docker_name" {
+  default = "docker"
+}
+
 #ASG Variables
 variable "ami-name" {
   default = "host_ami"
@@ -107,7 +111,7 @@ variable "launch-configname" {
 }
 
 variable "sg_name3" {
-  default = "                                                "
+  default = ""
 }
 
 variable "asg-group-name" {
@@ -132,3 +136,10 @@ variable "new_relic_key" {
 
 # variable "nexus-ip" {}
 
+variable "doc_pass" {
+  default = "Ibrahim24."
+}
+
+variable "doc_user" {
+  default = "daicon001"
+}

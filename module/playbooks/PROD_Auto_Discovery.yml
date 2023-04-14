@@ -17,9 +17,9 @@
 
      - name: Get list of running PROD EC2 instance IP
        ec2_instance_info:
-         region: eu-west-2
+         region: eu-west-1
          filters:
-           \"tag:Name\": [\"docker_asg\", \"docker_server0\"]
+           \"tag:Name\": [\"docker_asg\"]
        register: ec2_instance_info
      - set_fact:
          msg: \"{{ ec2_instance_info | json_query('instances[*].private_ip_address') }}\"
@@ -52,13 +52,14 @@
      - name: update new inventory file
        shell: |
           echo -e {% for ip in PRODConsole %}
-          \"{{ ip }} ansible_ssh_private_key_file=/home/ec2-user/paceud-kp2\\n\" {% endfor %} >> /etc/ansible/hosts
+          \"{{ ip }} ansible_ssh_private_key_file=/home/ec2-user/Codeman\\n\" {% endfor %} >> /etc/ansible/hosts
 
      - meta: refresh_inventory
+     
      - name: Pause for 10 seconds to build app cache
        wait_for:
          timeout : 20
- - import_playbook: /home/ec2-user/playbooks/PRODcontainer.yml
+ - import_playbook: /home/ec2-user/playbooks/PROD_runner.yml
    ignore_errors: yes
-# - import_playbook: /home/ubuntu/playbooks/deployment.yml
-#   ignore_errors: yes
+
+

@@ -1,11 +1,11 @@
-data "aws_route53_zone" "main-domain" {
+data "aws_route53_zone" "Hash-domain" {
   name         = var.domain_name
   private_zone = false
 }
 
 # Route53 Record
 resource "aws_route53_record" "Hash_record" {
-  zone_id = data.aws_route53_zone.main-domain.zone_id
+  zone_id = data.aws_route53_zone.Hash-domain.zone_id
   name    = var.domain_name
   type    = "A"
 
