@@ -5,6 +5,7 @@ resource "aws_instance" "ansible" {
   subnet_id                   = var.subnet_id
   availability_zone           = var.azs
   key_name                    = var.key_name
+  iam_instance_profile        = var.iam_instance_profile
   associate_public_ip_address = true
   user_data = var.user_data
   

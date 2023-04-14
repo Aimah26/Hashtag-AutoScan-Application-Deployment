@@ -4,7 +4,7 @@ sudo yum update -y
 sudo yum install java-11-openjdk-devel git -y
 sudo yum install wget -y
 sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins.io/redhat-stable/jenkins.repo
-sudo rpm --import http://pkg.jenkins.io/redhat-stable/jenkins.io.key
+sudo rpm --import http://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 sudo yum update -y
 sudo yum install jenkins -y
 sudo systemctl start jenkins

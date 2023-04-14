@@ -13,34 +13,34 @@ output "jenkins_IP" {
   value = module.jenkins.jenkins_IP
 }
 
-output "jenkins_lb" {
-  value = module.jenkins_lb.lb_DNS
+output "jenkins_elb_dns" {
+  value = module.jenkins_elb.jenkins_elb_dns
+}
+
+output "prod_elb_dns" {
+  value = module.Prod_elb.prod_elb_dns
 }
 
 output "Docker_IP" {
-  value = module.docker.Docker_IP
-}
-
-output "docker_lb" {
-  value = module.docker_lb.lb_DNS
-}
-
-output "nexus-ip" {
-  value = module.nexus.nexus-ip
+  value = module.docker.*.Docker_IP
 }
 
 output "ansible_IP" {
   value = module.ansible.ansible_IP
 }
 
-# output "Continuous-ip" {
-#   value = module.Cont_Instance.private_ip
-# }
+output "Continuous-ip" {
+  value = module.Cont_Instance.Cont_Instance_IP
+}
 
 output "lb_DNS" {
-  value = module.docker_lb.lb_DNS
+  value = module.alb.lb_DNS
 }
 
 output "Stage_lb_dns" {
   value = module.stage_lb.stage_lb_DNS
+}
+
+output "name_servers" {
+  value = module.route53.name_servers
 }

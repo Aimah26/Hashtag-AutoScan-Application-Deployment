@@ -38,4 +38,3 @@ sudo chkconfig --levels 345 nexus on
 sudo service nexus start
 sudo hostnamectl set-hostname Nexus
 EOF
-}

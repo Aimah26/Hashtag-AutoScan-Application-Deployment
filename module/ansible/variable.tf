@@ -10,6 +10,7 @@ variable "key_name" {}
 
 variable "vpc_security_group_ids" {}
 
+variable "iam_instance_profile" {}
 
 variable "user_data" {}
 
